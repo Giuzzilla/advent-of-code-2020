@@ -12,10 +12,8 @@ object Day1 {
     val list: List[Int] = Source.fromFile(path).getLines.toList.map(_.toInt)
     def solve(lst: List[Int], nCombinations: Int): Int =
       lst.combinations(nCombinations)
-        .toList
-        .view
-        .filter { case c: List[Int] => c.sum == 2020 }
-        .head
+        .filter { _.sum == 2020 }
+        .next()
         .product
 
     println(
