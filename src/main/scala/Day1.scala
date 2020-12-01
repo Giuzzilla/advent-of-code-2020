@@ -13,7 +13,7 @@ object Day1 {
     def solve(lst: List[Int], nCombinations: Int): Int =
       lst.combinations(nCombinations)
         .filter { _.sum == 2020 }
-        .next()
+        .next
         .product
 
     println(
