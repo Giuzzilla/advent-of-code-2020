@@ -74,9 +74,15 @@ object Day4 {
     val list: List[List[String]] = getChunks(
       Source.fromFile(path).getLines.toList
     )
+
+    def splitKeyValue(str: String): (String, String) = {
+      val splitted = str.split(':')
+      (splitted(0), splitted(1))
+    }
+
     val passports = list.map(fields =>
       Passport(
-        fields.map(field => field.split(':')(0) -> field.split(':')(1)).toMap
+        fields.map(splitKeyValue(_)).toMap
       )
     )
 
