@@ -66,10 +66,16 @@ object Day4 {
         args(0)
     }
 
-    def getChunks(s: List[String]): List[List[String]] = {
-      val (h, t) = s.span(_.nonEmpty)
-      if (h.isEmpty) List.empty
-      else h.flatMap(_.split(' ')) :: getChunks(t drop 1)
+    def getChunks(lst: List[String]): List[List[String]] = {
+      val (mainList, finalSublist) = lst.foldLeft(
+        (List[List[String]](), List[String]())
+      )((acc, curr) =>
+        curr match {
+          case "" => (acc._2 :: acc._1, List[String]())
+          case _  => (acc._1, curr.split(" ").toList ::: acc._2)
+        }
+      )
+      (finalSublist :: mainList).toList
     }
 
     val list: List[List[String]] = getChunks(
