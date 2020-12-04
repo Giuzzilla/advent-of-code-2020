@@ -75,7 +75,7 @@ object Day4 {
           case _  => (acc._1, curr.split(" ").toList ::: acc._2)
         }
       )
-      (finalSublist :: mainList).toList
+      finalSublist :: mainList
     }
 
     val list: List[List[String]] = getChunks(
