@@ -1,5 +1,6 @@
 import scala.io.Source
 import scala.util.matching.Regex.MatchIterator
+import scala.util.matching.Regex
 
 case class Passport(fields: Map[String, String]) {
   val necessaryFields = Set(
@@ -14,10 +15,10 @@ case class Passport(fields: Map[String, String]) {
 
   def hasNecessaryFields: Boolean = necessaryFields subsetOf fields.keys.toSet
 
-  def checkPattern(pattern: String, str: String)(
+  def checkPattern(pattern: Regex, str: String)(
       fun: MatchIterator => Boolean
   ): Boolean = {
-    val it = pattern.r.findAllIn(str)
+    val it = pattern.findAllIn(str)
     if (it.isEmpty)
       false
     else
@@ -25,7 +26,7 @@ case class Passport(fields: Map[String, String]) {
   }
 
   def numberRange(
-      pattern: String,
+      pattern: Regex,
       str: String,
       greaterThan: Int,
       lessThan: Int
@@ -35,20 +36,20 @@ case class Passport(fields: Map[String, String]) {
       num >= greaterThan && num <= lessThan
     })
 
-  def simpleMatch(pattern: String, str: String): Boolean =
+  def simpleMatch(pattern: Regex, str: String): Boolean =
     checkPattern(pattern, str)((_: MatchIterator) => true)
 
   def isValidField(field: (String, String)): Boolean = field match {
-    case ("byr", value) => numberRange("^(\\d{4})$", value, 1920, 2002)
-    case ("iyr", value) => numberRange("^(\\d{4})$", value, 2010, 2020)
-    case ("eyr", value) => numberRange("^(\\d{4})$", value, 2020, 2030)
+    case ("byr", value) => numberRange("^(\\d{4})$".r, value, 1920, 2002)
+    case ("iyr", value) => numberRange("^(\\d{4})$".r, value, 2010, 2020)
+    case ("eyr", value) => numberRange("^(\\d{4})$".r, value, 2020, 2030)
     case ("hgt", value) =>
-      numberRange("^(\\d+)in$", value, 59, 76) ||
-      numberRange("^(\\d+)cm$", value, 150, 193)
-    case ("hcl", value) => simpleMatch("^\\#(?:\\d|[a-f]){6}$", value)
+      numberRange("^(\\d+)in$".r, value, 59, 76) ||
+      numberRange("^(\\d+)cm$".r, value, 150, 193)
+    case ("hcl", value) => simpleMatch("^\\#(?:\\d|[a-f]){6}$".r, value)
     case ("ecl", value) =>
-      simpleMatch("^(?:amb|blu|brn|gry|grn|hzl|oth)$", value)
-    case ("pid", value) => simpleMatch("^\\d{9}$", value)
+      simpleMatch("^(?:amb|blu|brn|gry|grn|hzl|oth)$".r, value)
+    case ("pid", value) => simpleMatch("^\\d{9}$".r, value)
     case ("cid", _)     => true
     case (_, _)         => false
   }
