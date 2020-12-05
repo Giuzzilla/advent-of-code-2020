@@ -2,37 +2,20 @@ import scala.io.Source
 import scala.annotation.tailrec
 
 case class Seat(id: String) {
-  @tailrec
-  final def recPartition(
-      startPos: Int,
-      endPos: Int,
-      signals: List[Boolean]
-  ): Int =
-    signals match {
-      case left :: tail => {
-        val newPos = startPos + (endPos - startPos) / 2
-        if (left)
-          recPartition(startPos, newPos, tail)
-        else
-          recPartition(newPos + 1, endPos, tail)
-      }
-      case Nil => startPos
-    }
-
   val conversionMap = Map(
-    'F' -> true,
-    'B' -> false,
-    'L' -> true,
-    'R' -> false
+    'F' -> '0',
+    'B' -> '1',
+    'L' -> '0',
+    'R' -> '1'
   )
 
-  val convertedId = id.toList.map(conversionMap)
+  val convertedId = id.toList.map(conversionMap).mkString("")
 
-  val row: Int = recPartition(0, 127, convertedId.take(7))
-  val col: Int = recPartition(0, 7, convertedId.takeRight(3))
-
-  val numericId = row * 8 + col
+  val numericId = Integer.parseInt(convertedId, 2)
+  val row: Int = Integer.parseInt(convertedId.take(7), 2)
+  val col: Int = Integer.parseInt(convertedId.takeRight(3), 2)
 }
+
 
 object Day5 {
   def main(args: Array[String]) {
