@@ -16,7 +16,9 @@ object Day6 {
       "First answer: " + groups.map(_.replace("\n", "").toSet.size).sum
     )
     println(
-      "Second answer: " + groups.map(_.split("\n").map(_.toSet).reduce(_.intersect(_)).size).sum
+      "Second answer: " + groups
+        .map(_.split("\n").map(_.toSet).reduce(_ & _).size)
+        .sum
     )
   }
 }
