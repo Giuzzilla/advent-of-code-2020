@@ -63,7 +63,7 @@ object Day8 {
         case Nop(value) => Jump(value)
         case _ => throw new RuntimeException("Replacing wrong instruction")
       }
-      vect.slice(0, idx) :+ newInst :++ vect.slice(idx + 1, vect.length)
+      vect.updated(idx, newInst)
     }
 
     def secondStar(vect: Vector[Instruction]): Int =
