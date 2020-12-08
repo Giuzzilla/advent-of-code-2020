@@ -3,18 +3,24 @@ import annotation.tailrec
 
 
 abstract class Instruction {
-  def newIdx(idx: Int): Int = idx + 1
-  def newAcc(acc: Int): Int = acc
+  def apply(state: MachineState): MachineState =
+    MachineState(state.idx +  1, state.acc)
 }
 
 case class Jump(value: Int) extends Instruction {
-  override def newIdx(idx: Int) = idx + value
+  override def apply(state: MachineState): MachineState =
+    MachineState(state.idx + value, state.acc)
 }
 case class Nop(value: Int) extends Instruction
 case class Acc(value: Int) extends Instruction {
-  override def newAcc(acc: Int): Int = acc + value
+  override def apply(state: MachineState): MachineState =
+    MachineState(state.idx + 1, state.acc + value)
 }
 
+case class MachineState(idx: Int, acc: Int, isTerminated: Boolean = false) {
+  def terminated: MachineState =
+    MachineState(idx, acc, true)
+}
 
 object Day8 {
   def main(args: Array[String]) {
@@ -41,20 +47,19 @@ object Day8 {
     }
     val vect = Source.fromFile(path).getLines.map(parseLine).toVector
 
-    def traverseInstList(vect: Vector[Instruction]): (Boolean, Int) = {
+    def traverseInstList(vect: Vector[Instruction]): MachineState = {
       @tailrec
-      def accTraverse(idx: Int, acc: Int, explored: Set[Int]): (Boolean, Int) = {
-        val inst = vect(idx)
-        val newIdx = inst.newIdx(idx)
-        val newAcc = inst.newAcc(acc)
-        if (newIdx >= vect.length)
-          (true, newAcc)
-        else if (explored.contains(newIdx))
-          (false, newAcc)
+      def accTraverse(state: MachineState, explored: Set[Int]): MachineState = {
+        val inst = vect(state.idx)
+        val newState = inst(state)
+        if (newState.idx >= vect.length)
+          newState.terminated
+        else if (explored.contains(newState.idx))
+          newState
         else
-          accTraverse(newIdx, newAcc, explored + newIdx)
+          accTraverse(newState, explored + newState.idx)
       }
-      accTraverse(0, 0, Set[Int]())
+      accTraverse(MachineState(0, 0), Set[Int]())
     }
 
     def switchNopJump(vect: Vector[Instruction], idx: Int): Vector[Instruction] = {
@@ -75,12 +80,12 @@ object Day8 {
           }
         ).map(_._2)
         newVect = switchNopJump(vect, idx)
-        (terminated, acc) = traverseInstList(newVect)
-        if (terminated == true)
-      } yield acc).head
+        state = traverseInstList(newVect)
+        if (state.isTerminated == true)
+      } yield state.acc).head
 
     println(
-      "First answer: " + traverseInstList(vect)._2
+      "First answer: " + traverseInstList(vect).acc
     )
     println(
       "Second answer: " + secondStar(vect)
