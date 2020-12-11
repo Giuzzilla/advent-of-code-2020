@@ -12,41 +12,64 @@ object Day11 {
 
     val vect = Source.fromFile(path).getLines.map(_.toVector).toVector
 
-    def updatePos(name: Char, neighbors: List[Char], maxNeighbors: Int): Char = name match {
-      case '.' => '.'
-      case 'L' => if (neighbors.forall(_ != '#')) '#' else 'L'
-      case '#' => if (neighbors.filter(_ == '#').length >= maxNeighbors) 'L' else '#'
-    }
+    def updatePos(name: Char, neighbors: List[Char], maxNeighbors: Int): Char =
+      name match {
+        case '.' => '.'
+        case 'L' =>
+          if (neighbors.forall(_ != '#')) '#' else 'L'
+        case '#' =>
+          if (neighbors.filter(_ == '#').length >= maxNeighbors) 'L' else '#'
+      }
 
-    def neighbors(vect: Vector[Vector[Char]], i: Int, j: Int, maxSight: Int = 1): List[Char] = {
+    def neighbors(
+        vect: Vector[Vector[Char]],
+        i: Int,
+        j: Int,
+        maxSight: Int = 1
+    ): List[Char] = {
       val dirs = (for {
         dirX <- -1 to 1
         dirY <- -1 to 1
         if (dirX != 0 || dirY != 0)
       } yield (dirX, dirY)).toSet
       @tailrec
-      def neighborsRec(neighbors: List[Char], sight: Int, seenDirections: Set[(Int, Int)]): List[Char] = {
-        val leftDirs = (dirs diff seenDirections).toList
-        if (leftDirs.isEmpty || sight > maxSight)
+      def neighborsRec(
+          neighbors: List[Char],
+          sight: Int,
+          unseenDirs: Set[(Int, Int)]
+      ): List[Char] = {
+        if (unseenDirs.isEmpty || sight > maxSight)
           neighbors
         else {
-          val results = for {
-            (dirX, dirY) <- leftDirs
-            iNew = i + dirX*sight
-            jNew = j + dirY*sight
-            element = if (iNew >= 0 && jNew >= 0 && iNew < vect.length && jNew < vect(i).length) vect(iNew)(jNew) else 'o'
+          val results = (for {
+            (dirX, dirY) <- unseenDirs
+            iNew = i + dirX * sight
+            jNew = j + dirY * sight
+            element =
+              if (
+                iNew >= 0
+                && jNew >= 0
+                && iNew < vect.length
+                && jNew < vect(i).length
+              ) vect(iNew)(jNew)
+              else 'o'
             if (element != '.')
-          } yield ((dirX, dirY), element)
+          } yield ((dirX, dirY), element)).toList
           val updatedNeighbors = results.map(_._2) ::: neighbors
-          val updatedSeenDirs = results.map(_._1).toSet ++ seenDirections
-          neighborsRec(updatedNeighbors, sight + 1, updatedSeenDirs)
+          val updatedUnseen = unseenDirs diff results.map(_._1).toSet
+          neighborsRec(updatedNeighbors, sight + 1, updatedUnseen)
         }
       }
-      neighborsRec(List[Char](), 1, Set[(Int, Int)]())
+      neighborsRec(List[Char](), 1, dirs)
     }
 
-    def updateMatrix(vect: Vector[Vector[Char]], limitedSight: Boolean = true, maxNeighbors: Int = 4): Vector[Vector[Char]] = {
-      val maxSight = if (limitedSight) 1 else math.max(vect.length, vect(0).length)
+    def updateMatrix(
+        vect: Vector[Vector[Char]],
+        limitedSight: Boolean = true,
+        maxNeighbors: Int = 4
+    ): Vector[Vector[Char]] = {
+      val maxSight =
+        if (limitedSight) 1 else math.max(vect.length, vect(0).length)
 
       @tailrec
       def recUpdate(currState: Vector[Vector[Char]]): Vector[Vector[Char]] = {
@@ -54,7 +77,11 @@ object Day11 {
           i <- 0 until currState.length
           j <- 0 until currState(i).length
           currPos = currState(i)(j)
-          updated = updatePos(currPos, neighbors(currState, i, j, maxSight), maxNeighbors)
+          updated = updatePos(
+            currPos,
+            neighbors(currState, i, j, maxSight),
+            maxNeighbors
+          )
           if (updated != currPos)
         } yield (updated, i, j)
 
@@ -62,7 +89,10 @@ object Day11 {
           currState
         else {
           val newState = updates.foldLeft(currState)((state, update) => {
-            state.updated(update._2, state(update._2).updated(update._3, update._1))
+            state.updated(
+              update._2,
+              state(update._2).updated(update._3, update._1)
+            )
           })
           /* ^ Might get slow over big matrixes, possibly here a mutable in-place Java array could be better.. */
           // updates foreach {
@@ -76,12 +106,14 @@ object Day11 {
       recUpdate(vect).toVector.map(_.toVector)
     }
 
+    def countHashtags(vect: Vector[Vector[Char]]): Int =
+      vect.flatten.filter(_ == '#').length
 
     println(
-      "First answer: " + updateMatrix(vect).flatten.filter(_ == '#').length
+      "First answer: " + countHashtags(updateMatrix(vect))
     )
     println(
-      "Second answer: " + updateMatrix(vect, false, 5).flatten.filter(_ == '#').length
+      "Second answer: " + countHashtags(updateMatrix(vect, false, 5))
     )
   }
 }
