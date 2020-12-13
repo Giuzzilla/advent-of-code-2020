@@ -86,7 +86,7 @@ object Day12 {
       }
     }
 
-    val list = Source.fromFile("input.txt").getLines.map(parseLine).toList
+    val list = Source.fromFile(path).getLines.map(parseLine).toList
 
     val firstStarShip = list.foldLeft(Ship(Point(0,0)))((ship: Ship, action: Action) => action match {
       case action: SumAction => Ship(action(ship.pos), ship.dir)
@@ -107,7 +107,3 @@ object Day12 {
     )
   }
 }
-
-
-
-
