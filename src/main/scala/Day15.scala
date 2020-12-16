@@ -12,19 +12,19 @@ object Day15 {
 
     val list = input.split(",").map(_.toInt).toList
 
-    def solution(lst: List[Int], steps: Long): Long = {
+    def solution(lst: List[Int], steps: Int): Int = {
       @tailrec
       def recFunc(
-          memory: Map[Int, Long],
+          memory: Map[Int, Int],
           last: Int,
-          idx: Long
-      ): Long = {
+          idx: Int
+      ): Int = {
         if (idx == steps - 1)
           last
         else {
           val nextVal =
             if (memory.contains(last))
-              (idx - memory(last)).toInt
+              idx - memory(last)
             else
               0
 
@@ -32,9 +32,9 @@ object Day15 {
         }
       }
       recFunc(
-        lst.zipWithIndex.map(t => (t._1, t._2.toLong)).toMap,
+        lst.zipWithIndex.map(t => (t._1, t._2)).toMap,
         lst.last,
-        (lst.length - 1).toLong
+        (lst.length - 1)
       )
     }
 
