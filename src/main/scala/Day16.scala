@@ -1,7 +1,6 @@
 import scala.io.Source
 import scala.annotation.tailrec
 
-
 case class Range(start: Int, end: Int) {
   def fits(num: Int) =
     num >= start && num <= end
@@ -36,15 +35,15 @@ object Day16 {
       l.split(",").map(_.toInt).toList
 
     val list = Source.fromFile(path).getLines.toList
-  
+
     val rules = list.slice(0, 20).map(parseRule)
     val allRanges = rules.flatMap(_.ranges)
 
     val myTicket = parseTicket(list(22)).map(BigInt(_))
     val allTickets = list.slice(25, list.length).map(parseTicket)
 
-    val (validTickets, invalidTickets) = allTickets.partition(
-      ticket => ticket.forall(value => allRanges.exists(_.fits(value)))
+    val (validTickets, invalidTickets) = allTickets.partition(ticket =>
+      ticket.forall(value => allRanges.exists(_.fits(value)))
     )
 
     val invalidValues = invalidTickets.flatMap(lst =>
@@ -56,24 +55,35 @@ object Day16 {
       (value, idx) <- ticket.zipWithIndex
       rule <- rules
       if (rule.valid(value))
-    } yield (idx, rule.name)).toList.groupBy(_._1).map { case (k, v) => k->v.map(_._2).groupBy(identity).filter(_._2.size == validTickets.length).map(_._1).toList}
-
+    } yield (idx, rule.name)).toList.groupBy(_._1).map { case (k, v) =>
+      k -> v
+        .map(_._2)
+        .groupBy(identity)
+        .filter(_._2.size == validTickets.length)
+        .map(_._1)
+        .toList
+    }
 
     @tailrec
-    def recEliminate(matches: Map[Int, List[String]], accMat: List[(Int, String)]): Map[Int, String] = {
+    def recEliminate(
+        matches: Map[Int, List[String]],
+        accMat: List[(Int, String)]
+    ): Map[Int, String] = {
       if (matches.forall(_._2.length <= 1)) {
         accMat.toMap
       } else {
-        val found = matches.filter(t => t._2.length == 1).map(t => (t._1, t._2(0))).toList
-        val newMat = matches.map(t => (t._1, t._2.filter(!found.map(_._2).contains(_))))
+        val found =
+          matches.filter(t => t._2.length == 1).map(t => (t._1, t._2(0))).toList
+        val newMat =
+          matches.map(t => (t._1, t._2.filter(!found.map(_._2).contains(_))))
         recEliminate(newMat, found ::: accMat)
       }
     }
 
     val associations = recEliminate(ids2Rules, List[(Int, String)]())
 
-    val depRulesIds = associations.filter(_._2.startsWith("departure")).map(_._1)
-
+    val depRulesIds =
+      associations.filter(_._2.startsWith("departure")).map(_._1)
 
     println(
       "First answer: " + invalidValues.sum
