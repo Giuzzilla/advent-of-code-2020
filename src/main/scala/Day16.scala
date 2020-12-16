@@ -21,14 +21,17 @@ object Day16 {
     }
 
     def parseRule(s: String): Rule = {
-      val nameRange = s.split(": ")
-      val name = nameRange(0)
-      val strRanges = nameRange(1).split(" or ")
-      val ranges = strRanges.map(s => {
-        val splitted = s.split("-")
-        Range(splitted(0).toInt, splitted(1).toInt)
-      })
-      Rule(name, ranges.toList)
+      val pattern = "(.+): (\\d+)-(\\d+) or (\\d+)-(\\d+)".r
+      s match {
+        case pattern(name, start1, end1, start2, end2) =>
+          Rule(
+            name,
+            List(
+              Range(start1.toInt, end1.toInt),
+              Range(start2.toInt, end2.toInt)
+            )
+          )
+      }
     }
 
     def parseTicket(l: String): List[Int] =
