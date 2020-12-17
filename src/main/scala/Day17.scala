@@ -62,10 +62,10 @@ object Day17 {
       if (cycle == maxCycle)
         cubeList
       else {
-        val xs = cubeList.map(_.x).distinct
-        val ys = cubeList.map(_.y).distinct
-        val zs = cubeList.map(_.z).distinct
-        val ws = cubeList.map(_.w).distinct
+        val xs = cubeList.map(_.x)
+        val ys = cubeList.map(_.y)
+        val zs = cubeList.map(_.z)
+        val ws = cubeList.map(_.w)
         val wsRange = if (secondStar) (ws.min - 1 to ws.max + 1) else (0 to 0)
         val newCubeList = (for {
           x <- xs.min - 1 to xs.max + 1
