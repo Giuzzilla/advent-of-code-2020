@@ -52,6 +52,7 @@ object Day17 {
       active = if (el == '#') true else false
     } yield Cube(rowId, colId, 0, 0, active)
 
+    @tailrec
     def doCycles(
         cubeList: List[Cube],
         secondStar: Boolean = false,
