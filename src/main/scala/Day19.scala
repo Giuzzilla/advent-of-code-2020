@@ -47,7 +47,7 @@ object Day19 {
         rule match {
           case CharRule(_, char) => char
           case RuleList(_, others) =>
-            "(" + others
+            "(?:" + others
               .map(
                 _.map((i: Int) =>
                   buildRegex(rules, rules(i), depth + 1, maxDepth)
@@ -56,14 +56,6 @@ object Day19 {
             ")"
         }
       }
-    }
-
-    def tryMatch(pattern: String, msg: String): Boolean = {
-      val it = (pattern.r findAllIn msg).matchData
-      if (it.isEmpty)
-        false
-      else
-        it.next.group(0) == msg
     }
 
     val list = Source.fromFile(path).getLines.toList
@@ -80,18 +72,24 @@ object Day19 {
 
     val messages = list.slice(140, list.length)
 
-    val (reg1 :: reg2 :: Nil) = Seq(rules1, rules2).map((ruleMap: Map[Int, Rule]) => buildRegex(ruleMap, ruleMap(0), 0, messages.map(_.length).max))
+    val (reg1 :: reg2 :: Nil) = Seq(rules1, rules2).map((ruleMap: Map[Int, Rule]) => buildRegex(ruleMap, ruleMap(0), 0, messages.map(_.length).max).r)
 
 
     println(
       "First answer: " + messages
-        .map(tryMatch(reg1, _))
+        .map((msg: String) => (reg1 findFirstIn msg) match {
+          case Some(matched) => matched == msg
+          case None => false
+        })
         .filter(_ == true)
         .length
     )
     println(
       "Second answer: " + messages
-        .map(tryMatch(reg2, _))
+        .map((msg: String) => (reg2 findFirstIn msg) match {
+          case Some(matched) => matched == msg
+          case None => false
+        })
         .filter(_ == true)
         .length
     )
