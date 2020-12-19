@@ -1,11 +1,9 @@
 import scala.io.Source
 import scala.annotation.tailrec
 
-sealed trait Rule {
-  val id: Int
-}
-case class CharRule(id: Int, char: String) extends Rule
-case class RuleList(id: Int, others: List[List[Int]]) extends Rule
+sealed trait Rule
+case class CharRule(char: String) extends Rule
+case class RuleList(others: List[List[Int]]) extends Rule
 
 object Day19 {
   def main(args: Array[String]) {
@@ -16,23 +14,22 @@ object Day19 {
         args(0)
     }
 
-    def parseRule(s: String): Rule = {
+    def parseRule(s: String): (Int, Rule) = {
       val split1 = s.split(": ")
       val idx = split1(0).toInt
       val lst: List[String] = split1(1).split(" \\| ").toList
 
       val patternWord = "\"(\\w)\"".r
       val rule: Rule = lst.head match {
-        case patternWord(word) => CharRule(idx, word)
+        case patternWord(word) => CharRule(word)
         case _ =>
           RuleList(
-            idx,
             lst.foldLeft(List[List[Int]]())((acc, curr) =>
               acc appended curr.split(" ").map(_.toInt).toList
             )
           )
       }
-      rule
+      (idx, rule)
     }
 
     def buildRegex(
@@ -45,8 +42,8 @@ object Day19 {
         ""
       else {
         rule match {
-          case CharRule(_, char) => char
-          case RuleList(_, others) =>
+          case CharRule(char) => char
+          case RuleList(others) =>
             "(?:" + others
               .map(
                 _.map((i: Int) =>
@@ -65,8 +62,8 @@ object Day19 {
     val (rules1 :: rules2 :: Nil) =
       Seq(list, modified).map((lst: List[String]) => lst.slice(0, 139).map {
         (s: String) => {
-          val rule = parseRule(s)
-          rule.id -> rule
+          val (idx, rule) = parseRule(s)
+          idx -> rule
         }
       }.toMap)
 
