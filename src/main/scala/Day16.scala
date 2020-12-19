@@ -6,7 +6,7 @@ case class Range(start: Int, end: Int) {
     num >= start && num <= end
 }
 
-case class Rule(name: String, ranges: List[Range]) {
+case class NumRule(name: String, ranges: List[Range]) {
   def valid(num: Int): Boolean =
     ranges.exists(_.fits(num))
 }
@@ -20,11 +20,11 @@ object Day16 {
         args(0)
     }
 
-    def parseRule(s: String): Rule = {
+    def parseRule(s: String): NumRule = {
       val pattern = "(.+): (\\d+)-(\\d+) or (\\d+)-(\\d+)".r
       s match {
         case pattern(name, start1, end1, start2, end2) =>
-          Rule(
+          NumRule(
             name,
             List(
               Range(start1.toInt, end1.toInt),
