@@ -26,18 +26,17 @@ object Day21 {
 
     @tailrec
     def recEliminate(
-        map: Map[String, Set[String]],
+        currMap: Map[String, Set[String]],
         lst: List[(String, String)]
     ): List[(String, String)] = {
-      if (map.isEmpty)
+      if (currMap.isEmpty)
         lst
       else {
-        val singlesMap = map.filter { case (_, v) => v.size == 1 }
+        val singlesMap = currMap.filter { case (_, v) => v.size == 1 }
         val singles = singlesMap.map { case (k, v) => (k, v.head) }.toList
-        val mapM = map -- singlesMap.map { case (k, _) => k }
-        val newMap = mapM.map { case (k, v) =>
+        val newMap = currMap.map { case (k, v) =>
           k -> v.filter(a => !singles.map(_._2).contains(a))
-        }
+        } -- singlesMap.keys
         val newLst = singles ::: lst
         recEliminate(newMap, newLst)
       }
@@ -45,7 +44,7 @@ object Day21 {
 
     val list = Source.fromFile(path).getLines.toList.map(parseItem(_))
 
-    val al = (for {
+    val allergenMap = (for {
       food <- list
       allergen <- food.allergens
       ingred = food.ingredients
@@ -54,7 +53,7 @@ object Day21 {
     }
 
     val goodList =
-      (list.flatMap(_.ingredients).toSet diff al.map(_._2).reduce(_ | _))
+      (list.flatMap(_.ingredients).toSet diff allergenMap.map(_._2).reduce(_ | _))
 
     println(
       "First answer: " + list
@@ -63,7 +62,7 @@ object Day21 {
         .length
     )
     println(
-      "Second answer: " + recEliminate(al, List[(String, String)]())
+      "Second answer: " + recEliminate(allergenMap, List[(String, String)]())
         .sortBy(_._1)
         .map(_._2)
         .mkString(",")
