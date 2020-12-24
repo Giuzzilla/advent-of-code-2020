@@ -13,20 +13,20 @@ object Day24 {
 
     type Tile = (Int, Int)
 
+    val dirMap = Map(
+      "sw"-> (-1, -1),
+      "se"-> (-1, 1),
+      "nw"-> (1, -1),
+      "ne"-> (1, 1),
+      "e" -> (0, 2),
+      "w" -> (0, -2)
+    )
+
     def parseTile(s: String): Tile = {
-      val patt = "(se|sw|nw|ne|w|e|s|n)".r
+      val patt = "(se|sw|nw|ne|w|e)".r
       val stepsLst = for {
         matched <- patt.findAllMatchIn(s)
-        pos = matched.group(1) match {
-          case "sw" => (-1, -1)
-          case "se" => (-1, 1)
-          case "nw" => (1, -1)
-          case "ne" => (1, 1)
-          case "e" => (0, 2)
-          case "w" => (0, -2)
-          case "n" => (2, 0)
-          case "s" => (-2, 0)
-        }
+        pos = dirMap(matched.group(1))
       } yield pos
       val finalPos = stepsLst.foldLeft((0,0))(
         (acc, step) => 
@@ -40,14 +40,7 @@ object Day24 {
     val initBlacks = list.groupBy(identity).map(t => t._1->t._2.size).filter(_._2 % 2 != 0).keys.toSet
 
     def generateAdjacent(tile: Tile): List[Tile] = {
-      val steps = List(
-          (-1, -1),
-          (-1, 1),
-          (1, -1),
-          (1, 1),
-          (0, 2),
-          (0, -2)
-      )
+      val steps = dirMap.values.toList
       steps.map(s => (s._1 + tile._1, s._2 + tile._2))
     }
 
